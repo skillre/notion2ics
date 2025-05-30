@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
+  "outputDirectory": ".next",
   "headers": [
     {
       "source": "/api/calendar",
