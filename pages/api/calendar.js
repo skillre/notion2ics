@@ -19,6 +19,30 @@ function runMiddleware(req, res, fn) {
   });
 }
 
+// 格式化错误信息，确保不泄露敏感信息
+function formatErrorMessage(error) {
+  // 获取基本错误信息
+  const baseMessage = error.message || '未知错误';
+  
+  // 检查是否为Notion API错误
+  if (error.code) {
+    return `Notion API错误 (${error.code}): ${baseMessage}`;
+  }
+
+  // 检查是否缺少环境变量
+  if (baseMessage.includes('NOTION_API_KEY') || baseMessage.includes('NOTION_DATABASE_ID')) {
+    return `环境变量错误: ${baseMessage}`;
+  }
+  
+  // 检查是否为字段映射错误
+  if (baseMessage.includes('properties')) {
+    return `字段映射错误: 找不到指定的字段或字段类型不正确，请检查环境变量配置`;
+  }
+
+  // 其他错误类型
+  return `错误: ${baseMessage}`;
+}
+
 export default async function handler(req, res) {
   // 应用CORS中间件
   await runMiddleware(req, res, corsMiddleware);
@@ -30,13 +54,35 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('开始处理日历请求...');
+    
+    // 检查环境变量是否已配置
+    if (!process.env.NOTION_API_KEY) {
+      throw new Error('未设置 NOTION_API_KEY 环境变量');
+    }
+    
+    if (!process.env.NOTION_DATABASE_ID) {
+      throw new Error('未设置 NOTION_DATABASE_ID 环境变量');
+    }
+    
     // 每次请求都直接从Notion获取最新数据
+    console.log('从Notion获取数据...');
     const notionEvents = await getCalendarEvents();
+    console.log(`获取到 ${notionEvents.length} 个事件`);
     
     // 转换为ICS格式
+    console.log('转换为ICS格式...');
     const icsEvents = convertToICSEvents(notionEvents);
+    console.log(`成功转换 ${icsEvents.length} 个事件`);
+    
+    // 检查是否有有效事件
+    if (icsEvents.length === 0) {
+      console.warn('未找到有效的日历事件');
+      // 但仍然继续生成空日历
+    }
     
     // 生成ICS内容
+    console.log('生成ICS内容...');
     const icsContent = await new Promise((resolve, reject) => {
       createEvents(icsEvents, (error, value) => {
         if (error) {
@@ -56,9 +102,21 @@ export default async function handler(req, res) {
     res.setHeader('Expires', '0');
 
     // 返回ICS内容
+    console.log('日历生成成功，返回结果');
     res.status(200).send(icsContent);
   } catch (error) {
+    // 详细记录错误信息
     console.error('处理日历请求时出错:', error);
-    res.status(500).json({ error: '生成日历时出错' });
+    
+    // 格式化友好的错误信息
+    const errorMessage = formatErrorMessage(error);
+    console.error('格式化后的错误信息:', errorMessage);
+    
+    // 返回更详细的错误信息给用户
+    res.status(500).json({ 
+      error: errorMessage,
+      timestamp: new Date().toISOString(),
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 } 
