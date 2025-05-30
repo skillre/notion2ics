@@ -1,6 +1,0 @@
-notion-client==2.0.0
-icalendar==5.0.7
-python-dotenv==1.0.0
-requests==2.31.0
-pytz==2023.3
-flask==2.3.3 

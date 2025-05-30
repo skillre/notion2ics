@@ -1,36 +1,26 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/calendar.ics",
-      "dest": "/api/calendar.py"
-    },
-    {
-      "src": "/sync",
-      "dest": "/api/sync.py"
-    },
-    {
-      "src": "/status",
-      "dest": "/api/status.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
-    }
-  ],
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
   "crons": [
     {
-      "path": "/api/sync.py",
-      "schedule": "*/30 * * * *"
+      "path": "/api/sync",
+      "schedule": "0 * * * *"
     }
   ],
-  "env": {
-    "PYTHON_VERSION": "3.11"
-  }
+  "headers": [
+    {
+      "source": "/api/calendar",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "text/calendar"
+        }
+      ]
+    }
+  ]
 } 

@@ -1,0 +1,21 @@
+{
+  "name": "notion2ics",
+  "version": "1.0.0",
+  "description": "将Notion数据库转换为iCalendar格式",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.13",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ics": "^3.5.0",
+    "nanoid": "^5.0.4",
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+} 
