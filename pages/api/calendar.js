@@ -1,4 +1,5 @@
-import { generateICSFile } from '../../lib/ics-generator';
+import { getCalendarEvents, convertToICSEvents } from '../../lib/notion';
+import { createEvents } from 'ics';
 import cors from 'cors';
 
 // 配置CORS
@@ -29,8 +30,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 生成ICS文件内容
-    const icsContent = await generateICSFile();
+    // 每次请求都直接从Notion获取最新数据
+    const notionEvents = await getCalendarEvents();
+    
+    // 转换为ICS格式
+    const icsEvents = convertToICSEvents(notionEvents);
+    
+    // 生成ICS内容
+    const icsContent = await new Promise((resolve, reject) => {
+      createEvents(icsEvents, (error, value) => {
+        if (error) {
+          console.error('创建ICS事件时出错:', error);
+          reject(error);
+          return;
+        }
+        resolve(value);
+      });
+    });
 
     // 设置响应头
     res.setHeader('Content-Type', 'text/calendar');

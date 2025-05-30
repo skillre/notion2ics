@@ -5,7 +5,6 @@ import { generateShareUrl } from '../lib/ics-generator';
 export default function Home() {
   const [calendarUrl, setCalendarUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // 获取当前URL作为基础URL
@@ -20,26 +19,6 @@ export default function Home() {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000); // 2秒后重置复制状态
     });
-  };
-
-  // 手动触发同步
-  const triggerSync = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/sync', {
-        method: 'POST',
-      });
-      const data = await response.json();
-      if (data.success) {
-        alert('日历已成功同步！');
-      } else {
-        alert(`同步失败: ${data.error}`);
-      }
-    } catch (error) {
-      alert(`同步失败: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -69,18 +48,9 @@ export default function Home() {
               {isCopied ? '已复制✓' : '复制'}
             </button>
           </div>
-        </section>
-
-        <section className="info-section">
-          <h2>🔄 手动同步</h2>
-          <p>点击下方按钮手动同步您的Notion数据库与日历：</p>
-          <button 
-            onClick={triggerSync}
-            className="sync-button"
-            disabled={isLoading}
-          >
-            {isLoading ? '同步中...' : '立即同步'}
-          </button>
+          <p className="update-info">
+            <strong>实时更新：</strong> 每次日历应用请求数据时，系统都会自动从Notion获取最新内容。
+          </p>
         </section>
 
         <section className="info-section">
@@ -90,7 +60,7 @@ export default function Home() {
             <li>打开macOS上的"日历"应用</li>
             <li>点击顶部菜单中的"文件" &gt; "新建日历订阅"</li>
             <li>粘贴上方的日历链接并点击"订阅"</li>
-            <li>配置自动刷新选项（推荐设置为"每小时"）</li>
+            <li>配置自动刷新选项（推荐设置为"每小时"，这样日历应用会每小时获取一次最新数据）</li>
             <li>点击"确定"完成设置</li>
           </ol>
 
@@ -100,6 +70,7 @@ export default function Home() {
             <li>选择"其他"</li>
             <li>点击"添加已订阅的日历"</li>
             <li>粘贴上方的日历链接并保存</li>
+            <li>您可以在"设置" &gt; "日历" &gt; "账户" &gt; "获取新数据"中设置刷新频率</li>
           </ol>
         </section>
       </main>
@@ -193,24 +164,12 @@ export default function Home() {
           background-color: #0051a2;
         }
 
-        .sync-button {
-          padding: 0.7rem 1.5rem;
-          background-color: #0070f3;
-          color: white;
-          border: none;
+        .update-info {
+          margin-top: 1rem;
+          padding: 0.8rem;
+          background-color: #e6f7ff;
+          border-left: 4px solid #1890ff;
           border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-          font-size: 1rem;
-        }
-
-        .sync-button:hover {
-          background-color: #0051a2;
-        }
-
-        .sync-button:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
         }
 
         ol {
