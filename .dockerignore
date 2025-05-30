@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# 环境变量
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# 日志
+*.log
+
+# macOS
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 文档
+README.md
+INSTALL.md
+*.md
+
+# 启动配置文件
+*.plist
+*.plist.example 

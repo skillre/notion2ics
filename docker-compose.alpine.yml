@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  notion2ics:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: notion2ics
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:5000"
+    volumes:
+      - notion_calendar_data:/tmp
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+      - DOCKER_ENV=true
+    # 限制资源使用
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+        reservations:
+          memory: 50M
+
+volumes:
+  notion_calendar_data: 
