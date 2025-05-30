@@ -10,9 +10,30 @@
 - 定时自动同步更新
 - 可配置的事件字段映射
 
-## 安装与部署
+## 部署选项
 
-### 方式一：直接安装
+### 方式一：Vercel 一键部署 (推荐)
+
+最简单的部署方式，无需服务器，直接使用 Vercel 免费托管:
+
+1. Fork 此项目到您的 GitHub 账户
+2. 导入到 Vercel 并配置环境变量
+3. 完成部署，获取日历 URL
+
+详细步骤请参阅 [VERCEL.md](VERCEL.md)
+
+### 方式二：Docker 部署
+
+适合希望自托管的用户:
+
+1. 复制 `env.example` 到 `.env` 并填写必要信息
+2. 运行 `docker-compose up -d` 启动服务
+
+详细步骤请参阅 [DOCKER.md](DOCKER.md)
+
+### 方式三：直接安装
+
+适合熟悉 Python 的用户:
 
 1. 克隆此仓库
 2. 安装依赖: `pip install -r requirements.txt`
@@ -20,13 +41,6 @@
 4. 运行应用: `python app.py`
 
 详细步骤请参阅 [INSTALL.md](INSTALL.md)
-
-### 方式二：Docker 部署 (推荐)
-
-1. 复制 `env.example` 到 `.env` 并填写必要信息
-2. 运行 `docker-compose up -d` 启动服务
-
-详细步骤请参阅 [DOCKER.md](DOCKER.md)
 
 ## 配置说明
 
@@ -43,7 +57,7 @@ PORT=5000  # Web 服务端口
 
 1. 打开 macOS 日历应用
 2. 选择"文件" > "新建日历订阅"
-3. 输入 URL: `http://your-server-address:5000/calendar.ics`
+3. 输入 URL: `http://your-server-address:5000/calendar.ics` 或 Vercel 提供的 URL
 4. 根据需要配置自动刷新选项
 
 ## 部署建议
