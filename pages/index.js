@@ -54,6 +54,53 @@ export default function Home() {
         </section>
 
         <section className="info-section">
+          <h2>⚙️ 自定义字段说明</h2>
+          <p>本应用支持通过环境变量自定义Notion数据库字段映射：</p>
+          <table className="config-table">
+            <thead>
+              <tr>
+                <th>环境变量</th>
+                <th>默认值</th>
+                <th>说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>NOTION_TITLE_FIELD</td>
+                <td>Name</td>
+                <td>事件标题字段（标题类型）</td>
+              </tr>
+              <tr>
+                <td>NOTION_DATE_FIELD</td>
+                <td>Date</td>
+                <td>事件日期字段（日期类型）</td>
+              </tr>
+              <tr>
+                <td>NOTION_DESCRIPTION_FIELD</td>
+                <td>Description</td>
+                <td>事件描述字段（富文本类型）</td>
+              </tr>
+              <tr>
+                <td>NOTION_LOCATION_FIELD</td>
+                <td>Location</td>
+                <td>事件地点字段（富文本类型）</td>
+              </tr>
+              <tr>
+                <td>NOTION_SORT_FIELD</td>
+                <td>同日期字段</td>
+                <td>结果排序字段</td>
+              </tr>
+              <tr>
+                <td>NOTION_SORT_DIRECTION</td>
+                <td>ascending</td>
+                <td>排序方向（ascending或descending）</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="note-text">在Vercel的项目设置中配置上述环境变量，即可适配您的Notion数据库结构。</p>
+        </section>
+
+        <section className="info-section">
           <h2>📱 如何在设备上使用</h2>
           <h3>在macOS日历中订阅</h3>
           <ol>
@@ -66,8 +113,8 @@ export default function Home() {
 
           <h3>在iOS设备上订阅</h3>
           <ol>
-            <li>前往"设置" &gt; "日历" &gt; "账户" &gt; "添加账户"</li>
-            <li>选择"其他"</li>
+            <li>前往"设置" &gt; "日历" &gt; "账户"</li>
+            <li>点击"添加账户" &gt; "其他"</li>
             <li>点击"添加已订阅的日历"</li>
             <li>粘贴上方的日历链接并保存</li>
             <li>您可以在"设置" &gt; "日历" &gt; "账户" &gt; "获取新数据"中设置刷新频率</li>
@@ -170,6 +217,35 @@ export default function Home() {
           background-color: #e6f7ff;
           border-left: 4px solid #1890ff;
           border-radius: 4px;
+        }
+
+        .config-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1rem 0;
+          font-size: 0.9rem;
+        }
+
+        .config-table th, .config-table td {
+          padding: 0.6rem;
+          border: 1px solid #ddd;
+          text-align: left;
+        }
+
+        .config-table th {
+          background-color: #f2f2f2;
+          font-weight: bold;
+        }
+
+        .config-table tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+
+        .note-text {
+          font-size: 0.9rem;
+          color: #666;
+          font-style: italic;
+          margin-top: 1rem;
         }
 
         ol {

@@ -10,6 +10,7 @@
 - 实时响应，每次日历应用请求时都获取最新数据
 - 适配全天事件和定时事件
 - 包含事件标题、描述、位置等信息
+- 支持自定义Notion字段映射，适应不同的数据库结构
 
 ## 必要条件
 
@@ -21,7 +22,7 @@
 
 ## Notion数据库要求
 
-您的Notion数据库需要具有以下属性：
+您的Notion数据库需要包含日期信息，默认会查找以下属性（所有属性名称均可通过环境变量自定义）：
 
 - `Name`: 标题类型，用作事件标题
 - `Date`: 日期类型，包含事件的开始和结束时间
@@ -49,6 +50,7 @@
 3. 在环境变量设置中添加以下变量：
    - `NOTION_API_KEY`: 您的Notion API密钥
    - `NOTION_DATABASE_ID`: 您的Notion数据库ID
+   - 可选：根据您的数据库结构配置自定义字段映射（见下文）
 4. 点击"Deploy"开始部署
 
 ### 4. 在您的设备上订阅日历
@@ -69,6 +71,34 @@
 4. 输入同样的URL地址
 5. 您可以在"设置" > "日历" > "账户" > "获取新数据"中设置刷新频率
 
+## 自定义字段映射
+
+如果您的Notion数据库使用了与默认不同的属性名称，可以通过设置以下环境变量来自定义字段映射：
+
+| 环境变量 | 默认值 | 说明 |
+|---------|-------|-----|
+| NOTION_TITLE_FIELD | Name | 事件标题字段（标题类型）|
+| NOTION_DATE_FIELD | Date | 事件日期字段（日期类型）|
+| NOTION_DESCRIPTION_FIELD | Description | 事件描述字段（富文本类型）|
+| NOTION_LOCATION_FIELD | Location | 事件地点字段（富文本类型）|
+| NOTION_SORT_FIELD | 同日期字段 | 结果排序字段 |
+| NOTION_SORT_DIRECTION | ascending | 排序方向（ascending或descending）|
+
+例如，如果您的Notion数据库使用"事件名称"作为标题，"时间"作为日期，可以设置以下环境变量：
+
+```
+NOTION_TITLE_FIELD=事件名称
+NOTION_DATE_FIELD=时间
+```
+
+这些环境变量可以在Vercel的项目设置中配置：
+
+1. 进入您的项目
+2. 点击"Settings"选项卡
+3. 找到"Environment Variables"部分
+4. 添加所需的环境变量和对应的值
+5. 保存更改并重新部署项目
+
 ## 本地开发
 
 如果您想在本地开发和测试此项目：
@@ -79,6 +109,9 @@
    ```
    NOTION_API_KEY=your_notion_api_key_here
    NOTION_DATABASE_ID=your_notion_database_id_here
+   # 可选：自定义字段映射
+   NOTION_TITLE_FIELD=自定义标题字段
+   NOTION_DATE_FIELD=自定义日期字段
    ```
 4. 启动开发服务器： `npm run dev`
 5. 访问 `http://localhost:3000` 查看应用
@@ -92,17 +125,12 @@
 - 日历更新频率取决于您在日历应用中设置的刷新频率
 - 无需依赖额外的定时任务，更简单可靠
 
-## 自定义
-
-### 调整数据库属性映射
-
-如果您的Notion数据库使用了不同的属性名称，您可以修改`lib/notion.js`文件中的`convertToICSEvents`函数来映射正确的属性名称。
-
 ## 注意事项
 
 - 频繁的日历刷新可能会导致更多的API调用
 - Notion API有速率限制，请根据您的需求适当设置日历的刷新频率
 - 确保您的Notion集成已被授权访问您的数据库
+- 如果修改了字段映射，确保对应的字段类型正确，否则可能导致数据无法正确转换
 
 ## 许可
 
