@@ -1,6 +1,7 @@
 import { getCalendarEvents, convertToICSEvents } from '../../lib/notion';
 import { createEvents } from 'ics';
 import cors from 'cors';
+import crypto from 'crypto';
 
 // 配置CORS
 const corsMiddleware = cors({
@@ -17,6 +18,30 @@ function runMiddleware(req, res, fn) {
       return resolve(result);
     });
   });
+}
+
+/**
+ * 验证访问令牌
+ * @param {string} token - 提供的访问令牌
+ * @returns {boolean} 令牌是否有效
+ */
+function validateToken(token) {
+  if (!token) return false;
+  
+  // 从环境变量获取访问令牌
+  const validToken = process.env.ACCESS_TOKEN;
+  
+  // 如果未设置环境变量中的访问令牌，则禁止所有访问
+  if (!validToken) {
+    console.warn('未配置ACCESS_TOKEN环境变量，禁止所有访问');
+    return false;
+  }
+  
+  // 使用恒定时间比较防止计时攻击
+  return crypto.timingSafeEqual(
+    Buffer.from(token),
+    Buffer.from(validToken)
+  );
 }
 
 // 格式化错误信息，确保不泄露敏感信息
@@ -51,6 +76,23 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).end('Method Not Allowed');
+  }
+  
+  // 鉴权检查
+  const { token } = req.query;
+  
+  // 检查是否提供了访问令牌并且令牌有效
+  try {
+    if (!validateToken(token)) {
+      console.warn('访问令牌无效或未提供:', token);
+      return res.status(401).json({
+        error: '访问未授权，请提供有效的访问令牌',
+        hint: '将访问令牌作为查询参数添加到URL: /api/calendar?token=YOUR_TOKEN'
+      });
+    }
+  } catch (authError) {
+    console.error('令牌验证出错:', authError);
+    return res.status(500).json({ error: '授权验证失败' });
   }
 
   try {

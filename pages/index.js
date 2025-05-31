@@ -5,13 +5,36 @@ import { generateShareUrl } from '../lib/ics-generator';
 export default function Home() {
   const [calendarUrl, setCalendarUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [accessToken, setAccessToken] = useState('');
+  const [hasGeneratedUrl, setHasGeneratedUrl] = useState(false);
 
   useEffect(() => {
     // 获取当前URL作为基础URL
     const baseUrl = window.location.origin;
+    
+    // 生成基本URL（不包含令牌）
     const url = generateShareUrl(baseUrl);
     setCalendarUrl(url);
+    
+    // 尝试从localStorage恢复保存的令牌
+    const savedToken = localStorage.getItem('calendar_access_token');
+    if (savedToken) {
+      setAccessToken(savedToken);
+    }
   }, []);
+
+  // 生成带访问令牌的URL
+  const generateSecureUrl = () => {
+    const baseUrl = window.location.origin;
+    const secureUrl = generateShareUrl(baseUrl, accessToken);
+    setCalendarUrl(secureUrl);
+    setHasGeneratedUrl(true);
+    
+    // 保存令牌到localStorage
+    if (accessToken) {
+      localStorage.setItem('calendar_access_token', accessToken);
+    }
+  };
 
   // 复制URL到剪贴板
   const copyToClipboard = () => {
@@ -31,6 +54,33 @@ export default function Home() {
 
       <main>
         <h1>Notion到日历同步工具</h1>
+        
+        <section className="info-section">
+          <h2>🔒 安全访问</h2>
+          <p>为保护您的日历数据安全，访问日历需要提供访问令牌：</p>
+          <div className="token-container">
+            <input
+              type="text"
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value)}
+              placeholder="输入访问令牌"
+              className="token-input"
+            />
+            <button 
+              onClick={generateSecureUrl}
+              className="generate-button"
+              disabled={!accessToken}
+            >
+              生成安全链接
+            </button>
+          </div>
+          {hasGeneratedUrl && (
+            <p className="success-text">✅ 已生成带访问令牌的安全链接</p>
+          )}
+          <p className="note-text">
+            访问令牌是系统管理员配置的，必须与系统中设置的ACCESS_TOKEN环境变量一致。
+          </p>
+        </section>
         
         <section className="info-section">
           <h2>📅 您的日历链接</h2>
@@ -119,6 +169,14 @@ export default function Home() {
             <li>粘贴上方的日历链接并保存</li>
             <li>您可以在"设置" &gt; "日历" &gt; "账户" &gt; "获取新数据"中设置刷新频率</li>
           </ol>
+          
+          <div className="security-note">
+            <h3>⚠️ 安全提示</h3>
+            <p>
+              请勿将带有访问令牌的URL分享给未经授权的人员。含有访问令牌的URL可以直接访问您的日历数据。
+              如果您怀疑令牌已泄露，请联系系统管理员更改访问令牌。
+            </p>
+          </div>
         </section>
       </main>
 
@@ -183,12 +241,12 @@ export default function Home() {
           background-color: #fafafa;
         }
 
-        .url-container {
+        .url-container, .token-container {
           display: flex;
           margin: 1rem 0;
         }
 
-        .url-input {
+        .url-input, .token-input {
           flex: 1;
           padding: 0.5rem;
           border: 1px solid #ccc;
@@ -197,7 +255,7 @@ export default function Home() {
           color: #333;
         }
 
-        .copy-button {
+        .copy-button, .generate-button {
           padding: 0.5rem 1rem;
           background-color: #0070f3;
           color: white;
@@ -207,8 +265,13 @@ export default function Home() {
           font-weight: bold;
         }
 
-        .copy-button:hover {
+        .copy-button:hover, .generate-button:hover {
           background-color: #0051a2;
+        }
+        
+        .generate-button:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
         }
 
         .update-info {
@@ -217,6 +280,32 @@ export default function Home() {
           background-color: #e6f7ff;
           border-left: 4px solid #1890ff;
           border-radius: 4px;
+        }
+        
+        .success-text {
+          color: #52c41a;
+          font-weight: bold;
+          margin-top: 0.5rem;
+        }
+        
+        .note-text {
+          font-size: 0.9rem;
+          color: #666;
+          font-style: italic;
+          margin-top: 0.5rem;
+        }
+        
+        .security-note {
+          margin-top: 1.5rem;
+          padding: 1rem;
+          background-color: #fff1f0;
+          border-left: 4px solid #ff4d4f;
+          border-radius: 4px;
+        }
+        
+        .security-note h3 {
+          margin-top: 0;
+          color: #cf1322;
         }
 
         .config-table {
@@ -239,13 +328,6 @@ export default function Home() {
 
         .config-table tr:nth-child(even) {
           background-color: #f9f9f9;
-        }
-
-        .note-text {
-          font-size: 0.9rem;
-          color: #666;
-          font-style: italic;
-          margin-top: 1rem;
         }
 
         ol {
