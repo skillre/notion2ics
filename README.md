@@ -81,8 +81,6 @@
 | NOTION_DATE_FIELD | Date | 事件日期字段（日期类型）|
 | NOTION_DESCRIPTION_FIELD | Description | 事件描述字段（富文本类型）|
 | NOTION_LOCATION_FIELD | Location | 事件地点字段（富文本类型）|
-| NOTION_SORT_FIELD | 同日期字段 | 结果排序字段 |
-| NOTION_SORT_DIRECTION | ascending | 排序方向（ascending或descending）|
 
 例如，如果您的Notion数据库使用"事件名称"作为标题，"时间"作为日期，可以设置以下环境变量：
 
@@ -138,7 +136,7 @@ NOTION_DATE_FIELD=时间
 
 ## 作者
 
-[您的名字]
+[skillre]
 
 ---
 
