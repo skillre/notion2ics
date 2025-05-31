@@ -138,6 +138,12 @@ NOTION_DATE_FIELD=时间
 
 [skillre]
 
+## ☕️☕️
+
+觉得有帮助，可以奖励作者一杯☕️，持续做出好用的工具。
+
+![](https://skillre-typora.oss-cn-beijing.aliyuncs.com/img/paycode.jpeg)
+
 ---
 
 希望这个工具能帮助您更好地管理日程安排！如果有任何问题或建议，请通过GitHub Issues联系我。 
