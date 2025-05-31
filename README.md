@@ -41,7 +41,7 @@
 2. 为集成授予适当的权限（至少需要读取数据库的权限）
 3. 复制生成的API密钥
 4. 在您的Notion数据库页面，点击"分享"并将您刚创建的集成添加为成员
-5. 从数据库URL中获取数据库ID（格式为：https://www.notion.so/workspace/[数据库ID]?v=...)
+5. 从数据库URL中获取数据库ID（格式为：https://www.notion.so/workspace/[数据库ID]?v=... )
 
 ### 3. 部署到Vercel
 
