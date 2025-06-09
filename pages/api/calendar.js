@@ -107,7 +107,7 @@ export default async function handler(req, res) {
       throw new Error('未设置 NOTION_DATABASE_ID 环境变量');
     }
     
-    // 每次请求都直接从Notion获取最新数据
+    // 每次请求都直接从Notion获取最新数据（从2023年1月1日至今后2个月的范围）
     console.log('从Notion获取数据...');
     const notionEvents = await getCalendarEvents();
     console.log(`获取到 ${notionEvents.length} 个事件`);
