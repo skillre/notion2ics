@@ -27,16 +27,16 @@ function runMiddleware(req, res, fn) {
  */
 function validateToken(token) {
   if (!token) return false;
-  
+
   // 从环境变量获取访问令牌
   const validToken = process.env.ACCESS_TOKEN;
-  
+
   // 如果未设置环境变量中的访问令牌，则禁止所有访问
   if (!validToken) {
     console.warn('未配置ACCESS_TOKEN环境变量，禁止所有访问');
     return false;
   }
-  
+
   // 使用恒定时间比较防止计时攻击
   return crypto.timingSafeEqual(
     Buffer.from(token),
@@ -48,7 +48,7 @@ function validateToken(token) {
 function formatErrorMessage(error) {
   // 获取基本错误信息
   const baseMessage = error.message || '未知错误';
-  
+
   // 检查是否为Notion API错误
   if (error.code) {
     return `Notion API错误 (${error.code}): ${baseMessage}`;
@@ -58,7 +58,7 @@ function formatErrorMessage(error) {
   if (baseMessage.includes('NOTION_API_KEY') || baseMessage.includes('NOTION_DATABASE_ID')) {
     return `环境变量错误: ${baseMessage}`;
   }
-  
+
   // 检查是否为字段映射错误
   if (baseMessage.includes('properties')) {
     return `字段映射错误: 找不到指定的字段或字段类型不正确，请检查环境变量配置`;
@@ -77,10 +77,10 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET');
     return res.status(405).end('Method Not Allowed');
   }
-  
+
   // 鉴权检查
-  const { token } = req.query;
-  
+  const { token, personId } = req.query;
+
   // 检查是否提供了访问令牌并且令牌有效
   try {
     if (!validateToken(token)) {
@@ -97,32 +97,35 @@ export default async function handler(req, res) {
 
   try {
     console.log('开始处理日历请求...');
-    
+    if (personId) {
+      console.log(`收到人员过滤请求: ${personId}`);
+    }
+
     // 检查环境变量是否已配置
     if (!process.env.NOTION_API_KEY) {
       throw new Error('未设置 NOTION_API_KEY 环境变量');
     }
-    
+
     if (!process.env.NOTION_DATABASE_ID) {
       throw new Error('未设置 NOTION_DATABASE_ID 环境变量');
     }
-    
+
     // 每次请求都直接从Notion获取最新数据（从2023年1月1日至今后2个月的范围）
     console.log('从Notion获取数据...');
-    const notionEvents = await getCalendarEvents();
+    const notionEvents = await getCalendarEvents(personId);
     console.log(`获取到 ${notionEvents.length} 个事件`);
-    
+
     // 转换为ICS格式
     console.log('转换为ICS格式...');
     const icsEvents = convertToICSEvents(notionEvents);
     console.log(`成功转换 ${icsEvents.length} 个事件`);
-    
+
     // 检查是否有有效事件
     if (icsEvents.length === 0) {
       console.warn('未找到有效的日历事件');
       // 但仍然继续生成空日历
     }
-    
+
     // 生成ICS内容
     console.log('生成ICS内容...');
     const icsContent = await new Promise((resolve, reject) => {
@@ -149,13 +152,13 @@ export default async function handler(req, res) {
   } catch (error) {
     // 详细记录错误信息
     console.error('处理日历请求时出错:', error);
-    
+
     // 格式化友好的错误信息
     const errorMessage = formatErrorMessage(error);
     console.error('格式化后的错误信息:', errorMessage);
-    
+
     // 返回更详细的错误信息给用户
-    res.status(500).json({ 
+    res.status(500).json({
       error: errorMessage,
       timestamp: new Date().toISOString(),
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined

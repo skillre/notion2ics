@@ -7,29 +7,50 @@ export default function Home() {
   const [isCopied, setIsCopied] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const [hasGeneratedUrl, setHasGeneratedUrl] = useState(false);
+  const [personnelList, setPersonnelList] = useState([]);
+  const [selectedPersonId, setSelectedPersonId] = useState('');
+  const [isLoadingPersonnel, setIsLoadingPersonnel] = useState(false);
 
   useEffect(() => {
     // 获取当前URL作为基础URL
     const baseUrl = window.location.origin;
-    
+
     // 生成基本URL（不包含令牌）
     const url = generateShareUrl(baseUrl);
     setCalendarUrl(url);
-    
+
     // 尝试从localStorage恢复保存的令牌
     const savedToken = localStorage.getItem('calendar_access_token');
     if (savedToken) {
       setAccessToken(savedToken);
     }
+
+    // 获取人员列表
+    const fetchPersonnel = async () => {
+      setIsLoadingPersonnel(true);
+      try {
+        const res = await fetch('/api/personnel');
+        if (res.ok) {
+          const data = await res.json();
+          setPersonnelList(data);
+        }
+      } catch (error) {
+        console.error('获取人员列表失败:', error);
+      } finally {
+        setIsLoadingPersonnel(false);
+      }
+    };
+
+    fetchPersonnel();
   }, []);
 
   // 生成带访问令牌的URL
   const generateSecureUrl = () => {
     const baseUrl = window.location.origin;
-    const secureUrl = generateShareUrl(baseUrl, accessToken);
+    const secureUrl = generateShareUrl(baseUrl, accessToken, selectedPersonId);
     setCalendarUrl(secureUrl);
     setHasGeneratedUrl(true);
-    
+
     // 保存令牌到localStorage
     if (accessToken) {
       localStorage.setItem('calendar_access_token', accessToken);
@@ -54,7 +75,28 @@ export default function Home() {
 
       <main>
         <h1>Notion到日历同步工具</h1>
-        
+
+        <section className="info-section">
+          <h2>👤 人员筛选（可选）</h2>
+          <p>选择特定人员以仅同步与其相关的工作安排：</p>
+          <div className="personnel-container">
+            <select
+              value={selectedPersonId}
+              onChange={(e) => setSelectedPersonId(e.target.value)}
+              className="personnel-select"
+              disabled={isLoadingPersonnel}
+            >
+              <option value="">-- 显示所有人员 --</option>
+              {personnelList.map(person => (
+                <option key={person.id} value={person.id}>
+                  {person.name}
+                </option>
+              ))}
+            </select>
+            {isLoadingPersonnel && <span className="loading-text">加载中...</span>}
+          </div>
+        </section>
+
         <section className="info-section">
           <h2>🔒 安全访问</h2>
           <p>为保护您的日历数据安全，访问日历需要提供访问令牌：</p>
@@ -66,7 +108,7 @@ export default function Home() {
               placeholder="输入访问令牌"
               className="token-input"
             />
-            <button 
+            <button
               onClick={generateSecureUrl}
               className="generate-button"
               disabled={!accessToken}
@@ -81,7 +123,7 @@ export default function Home() {
             访问令牌是系统管理员配置的，必须与系统中设置的ACCESS_TOKEN环境变量一致。
           </p>
         </section>
-        
+
         <section className="info-section">
           <h2>📅 您的日历链接</h2>
           <div className="url-container">
@@ -91,7 +133,7 @@ export default function Home() {
               readOnly
               className="url-input"
             />
-            <button 
+            <button
               onClick={copyToClipboard}
               className="copy-button"
             >
@@ -169,7 +211,7 @@ export default function Home() {
             <li>粘贴上方的日历链接并保存</li>
             <li>您可以在"设置" &gt; "日历" &gt; "账户" &gt; "获取新数据"中设置刷新频率</li>
           </ol>
-          
+
           <div className="security-note">
             <h3>⚠️ 安全提示</h3>
             <p>
@@ -252,7 +294,31 @@ export default function Home() {
           border: 1px solid #ccc;
           border-radius: 4px 0 0 4px;
           font-size: 0.9rem;
+          font-size: 0.9rem;
           color: #333;
+        }
+
+        .personnel-container {
+          margin: 1rem 0;
+          display: flex;
+          align-items: center;
+        }
+
+        .personnel-select {
+          flex: 1;
+          padding: 0.5rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 0.9rem;
+          color: #333;
+          max-width: 300px;
+          background-color: white;
+        }
+
+        .loading-text {
+          margin-left: 10px;
+          font-size: 0.8rem;
+          color: #666;
         }
 
         .copy-button, .generate-button {
